@@ -3,7 +3,7 @@
 use serde::{Deserialize, Serialize};
 
 /// Direction of a file transfer between mesh nodes.
-#[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
 #[serde(rename_all = "lowercase")]
 pub enum TransferDirection {
     Push,
@@ -32,6 +32,31 @@ pub struct TransferRequest {
     pub exclude_patterns: Vec<String>,
 }
 
+impl TransferRequest {
+    /// Validate request fields before executing a transfer.
+    pub fn validate(&self) -> Result<(), &'static str> {
+        if self.source_path.trim().is_empty() {
+            return Err("source_path must not be empty");
+        }
+        if self.dest_path.trim().is_empty() {
+            return Err("dest_path must not be empty");
+        }
+        if self.peer_name.trim().is_empty() {
+            return Err("peer_name must not be empty");
+        }
+        if self.ssh_target.trim().is_empty() {
+            return Err("ssh_target must not be empty");
+        }
+        // Reject exclude patterns that look like rsync flags
+        for pat in &self.exclude_patterns {
+            if pat.starts_with('-') {
+                return Err("exclude pattern must not start with '-'");
+            }
+        }
+        Ok(())
+    }
+}
+
 /// Outcome of an individual transfer.
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct TransferResult {
@@ -43,7 +68,7 @@ pub struct TransferResult {
 }
 
 /// Status of a completed transfer.
-#[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
 #[serde(tag = "type", content = "message")]
 pub enum TransferStatus {
     Success,
@@ -108,5 +133,64 @@ mod tests {
         let back: TransferRequest = serde_json::from_str(&json).unwrap();
         assert_eq!(back.peer_name, "studio-mac");
         assert_eq!(back.direction, TransferDirection::Push);
+    }
+
+    #[test]
+    fn validate_rejects_empty_source() {
+        let mut req = TransferRequest {
+            source_path: "".into(),
+            dest_path: "/backup".into(),
+            peer_name: "peer".into(),
+            ssh_target: "user@host".into(),
+            direction: TransferDirection::Push,
+            exclude_patterns: vec![],
+        };
+        assert!(req.validate().is_err());
+        req.source_path = "  ".into();
+        assert!(req.validate().is_err());
+    }
+
+    #[test]
+    fn validate_rejects_empty_fields() {
+        let base = TransferRequest {
+            source_path: "/src".into(),
+            dest_path: "/dst".into(),
+            peer_name: "peer".into(),
+            ssh_target: "user@host".into(),
+            direction: TransferDirection::Push,
+            exclude_patterns: vec![],
+        };
+        assert!(base.validate().is_ok());
+
+        let mut bad = base.clone();
+        bad.dest_path = "".into();
+        assert!(bad.validate().is_err());
+
+        let mut bad = base.clone();
+        bad.peer_name = "".into();
+        assert!(bad.validate().is_err());
+
+        let mut bad = base;
+        bad.ssh_target = "".into();
+        assert!(bad.validate().is_err());
+    }
+
+    #[test]
+    fn validate_rejects_flag_like_exclude() {
+        let req = TransferRequest {
+            source_path: "/src".into(),
+            dest_path: "/dst".into(),
+            peer_name: "peer".into(),
+            ssh_target: "user@host".into(),
+            direction: TransferDirection::Push,
+            exclude_patterns: vec!["--delete-before".into()],
+        };
+        assert!(req.validate().is_err());
+    }
+
+    #[test]
+    fn direction_is_eq() {
+        assert_eq!(TransferDirection::Push, TransferDirection::Push);
+        assert_ne!(TransferDirection::Push, TransferDirection::Pull);
     }
 }

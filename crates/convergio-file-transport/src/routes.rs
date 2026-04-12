@@ -43,6 +43,10 @@ async fn pull_transfer(
 }
 
 async fn execute_and_record(pool: ConnPool, req: TransferRequest) -> Json<Value> {
+    if let Err(e) = req.validate() {
+        return Json(json!({"ok": false, "error": e}));
+    }
+
     let result = match crate::rsync::execute_rsync(&req, &req.ssh_target).await {
         Ok(r) => r,
         Err(e) => {
