@@ -40,6 +40,9 @@ pub async fn execute_rsync(
     req: &TransferRequest,
     ssh_target: &str,
 ) -> Result<TransferResult, Box<dyn std::error::Error + Send + Sync>> {
+    req.validate()
+        .map_err(|e| -> Box<dyn std::error::Error + Send + Sync> { e.into() })?;
+
     let start = Instant::now();
     let mut cmd = build_rsync_command(req, ssh_target);
 

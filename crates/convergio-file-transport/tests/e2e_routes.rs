@@ -26,7 +26,7 @@ fn rebuild(pool: &ConnPool) -> axum::Router {
 }
 
 async fn body_json(resp: axum::http::Response<Body>) -> serde_json::Value {
-    let bytes = axum::body::to_bytes(resp.into_body(), usize::MAX)
+    let bytes = axum::body::to_bytes(resp.into_body(), 1024 * 1024)
         .await
         .unwrap();
     serde_json::from_slice(&bytes).unwrap()

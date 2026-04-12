@@ -9,10 +9,10 @@ pub fn record_transfer(
     result: &TransferResult,
     req: &TransferRequest,
 ) -> Result<i64, rusqlite::Error> {
-    let (status_str, error_msg) = match &result.status {
-        TransferStatus::Success => ("success".to_string(), None),
-        TransferStatus::Failed(msg) => ("failed".to_string(), Some(msg.clone())),
-        TransferStatus::PartialSuccess(msg) => ("partial".to_string(), Some(msg.clone())),
+    let (status_str, error_msg): (&str, Option<&str>) = match &result.status {
+        TransferStatus::Success => ("success", None),
+        TransferStatus::Failed(msg) => ("failed", Some(msg.as_str())),
+        TransferStatus::PartialSuccess(msg) => ("partial", Some(msg.as_str())),
     };
 
     conn.execute(
