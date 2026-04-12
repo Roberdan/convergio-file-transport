@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.1.2](https://github.com/Roberdan/convergio-file-transport/compare/convergio-file-transport-v0.1.1...convergio-file-transport-v0.1.2) (2026-04-12)
+
+
+### Bug Fixes
+
+* align SDK dependency to v0.1.9 for type compatibility ([70f5030](https://github.com/Roberdan/convergio-file-transport/commit/70f503054c7fdc9e6fafe1e5a7ac14f89bfa269f))
+
 ## [0.1.1](https://github.com/Roberdan/convergio-file-transport/compare/convergio-file-transport-v0.1.0...convergio-file-transport-v0.1.1) (2026-04-12)
 
 
