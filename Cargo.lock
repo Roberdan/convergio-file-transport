@@ -212,7 +212,6 @@ name = "convergio-file-transport"
 version = "0.1.6"
 dependencies = [
  "axum",
- "chrono",
  "convergio-db",
  "convergio-types",
  "rusqlite",

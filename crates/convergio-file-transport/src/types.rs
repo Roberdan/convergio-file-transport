@@ -32,6 +32,11 @@ pub struct TransferRequest {
     pub exclude_patterns: Vec<String>,
 }
 
+/// Check a string for null bytes and control characters (except space).
+fn has_dangerous_chars(s: &str) -> bool {
+    s.bytes().any(|b| b == 0 || (b < 0x20 && b != b' '))
+}
+
 impl TransferRequest {
     /// Validate request fields before executing a transfer.
     pub fn validate(&self) -> Result<(), &'static str> {
@@ -47,10 +52,39 @@ impl TransferRequest {
         if self.ssh_target.trim().is_empty() {
             return Err("ssh_target must not be empty");
         }
+        // Reject null bytes / control chars — prevents string truncation
+        // and shell-level confusion in rsync/ssh subprocesses.
+        if has_dangerous_chars(&self.source_path) {
+            return Err("source_path contains invalid characters");
+        }
+        if has_dangerous_chars(&self.dest_path) {
+            return Err("dest_path contains invalid characters");
+        }
+        if has_dangerous_chars(&self.peer_name) {
+            return Err("peer_name contains invalid characters");
+        }
+        if has_dangerous_chars(&self.ssh_target) {
+            return Err("ssh_target contains invalid characters");
+        }
+        // Paths starting with '-' would be interpreted as rsync flags.
+        if self.source_path.trim_start().starts_with('-') {
+            return Err("source_path must not start with '-'");
+        }
+        if self.dest_path.trim_start().starts_with('-') {
+            return Err("dest_path must not start with '-'");
+        }
+        // ssh_target must not contain spaces — prevents argument injection
+        // when rsync constructs the SSH command line.
+        if self.ssh_target.contains(' ') {
+            return Err("ssh_target must not contain spaces");
+        }
         // Reject exclude patterns that look like rsync flags
         for pat in &self.exclude_patterns {
             if pat.starts_with('-') {
                 return Err("exclude pattern must not start with '-'");
+            }
+            if has_dangerous_chars(pat) {
+                return Err("exclude pattern contains invalid characters");
             }
         }
         Ok(())
@@ -184,6 +218,71 @@ mod tests {
             ssh_target: "user@host".into(),
             direction: TransferDirection::Push,
             exclude_patterns: vec!["--delete-before".into()],
+        };
+        assert!(req.validate().is_err());
+    }
+
+    #[test]
+    fn validate_rejects_dash_prefix_source() {
+        let req = TransferRequest {
+            source_path: "--rsh=evil".into(),
+            dest_path: "/dst".into(),
+            peer_name: "peer".into(),
+            ssh_target: "user@host".into(),
+            direction: TransferDirection::Push,
+            exclude_patterns: vec![],
+        };
+        assert!(req.validate().is_err());
+    }
+
+    #[test]
+    fn validate_rejects_dash_prefix_dest() {
+        let req = TransferRequest {
+            source_path: "/src".into(),
+            dest_path: "-o evil".into(),
+            peer_name: "peer".into(),
+            ssh_target: "user@host".into(),
+            direction: TransferDirection::Push,
+            exclude_patterns: vec![],
+        };
+        assert!(req.validate().is_err());
+    }
+
+    #[test]
+    fn validate_rejects_null_bytes() {
+        let req = TransferRequest {
+            source_path: "/src\0/evil".into(),
+            dest_path: "/dst".into(),
+            peer_name: "peer".into(),
+            ssh_target: "user@host".into(),
+            direction: TransferDirection::Push,
+            exclude_patterns: vec![],
+        };
+        assert!(req.validate().is_err());
+    }
+
+    #[test]
+    fn validate_rejects_ssh_target_with_spaces() {
+        let req = TransferRequest {
+            source_path: "/src".into(),
+            dest_path: "/dst".into(),
+            peer_name: "peer".into(),
+            ssh_target: "user@host -o ProxyCommand=evil".into(),
+            direction: TransferDirection::Push,
+            exclude_patterns: vec![],
+        };
+        assert!(req.validate().is_err());
+    }
+
+    #[test]
+    fn validate_rejects_control_chars_in_ssh_target() {
+        let req = TransferRequest {
+            source_path: "/src".into(),
+            dest_path: "/dst".into(),
+            peer_name: "peer".into(),
+            ssh_target: "user@host\nevil".into(),
+            direction: TransferDirection::Push,
+            exclude_patterns: vec![],
         };
         assert!(req.validate().is_err());
     }
