@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.1.6](https://github.com/Roberdan/convergio-file-transport/compare/v0.1.5...v0.1.6) (2026-04-13)
+
+
+### Bug Fixes
+
+* pass CARGO_REGISTRY_TOKEN to release workflow ([cb42142](https://github.com/Roberdan/convergio-file-transport/commit/cb421422f8099c3a6fbfa247a0ea12ca7e116cef))
+
 ## [0.1.5](https://github.com/Roberdan/convergio-file-transport/compare/v0.1.4...v0.1.5) (2026-04-13)
 
 
