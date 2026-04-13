@@ -209,7 +209,7 @@ dependencies = [
 
 [[package]]
 name = "convergio-file-transport"
-version = "0.1.5"
+version = "0.1.6"
 dependencies = [
  "axum",
  "chrono",
