@@ -4,6 +4,7 @@ description = "Rsync-based file transport between mesh nodes"
 version = "0.1.4"
 edition.workspace = true
 license.workspace = true
+repository = "https://github.com/Roberdan/convergio-file-transport"
 readme = "../../README.md"
 
 [dependencies]
