@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.1.4](https://github.com/Roberdan/convergio-file-transport/compare/v0.1.3...v0.1.4) (2026-04-13)
+
+
+### Bug Fixes
+
+* regenerate Cargo.lock after SDK bump ([#6](https://github.com/Roberdan/convergio-file-transport/issues/6)) ([e0b38e8](https://github.com/Roberdan/convergio-file-transport/commit/e0b38e8481049f9f19412ffdea7e7dbe3450bddc))
+
 ## [0.1.3](https://github.com/Roberdan/convergio-file-transport/compare/v0.1.2...v0.1.3) (2026-04-13)
 
 
