@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.1.5](https://github.com/Roberdan/convergio-file-transport/compare/v0.1.4...v0.1.5) (2026-04-13)
+
+
+### Bug Fixes
+
+* add crates.io publishing metadata (description, repository) ([cd70229](https://github.com/Roberdan/convergio-file-transport/commit/cd70229b4704aa655c85382a378cc505b9621df0))
+
 ## [0.1.4](https://github.com/Roberdan/convergio-file-transport/compare/v0.1.3...v0.1.4) (2026-04-13)
 
 
