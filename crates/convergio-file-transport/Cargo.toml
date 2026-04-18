@@ -16,7 +16,6 @@ serde = { workspace = true }
 serde_json = { workspace = true }
 axum = { workspace = true }
 rusqlite = { workspace = true }
-chrono = { workspace = true }
 
 [dev-dependencies]
 tower = { version = "0.5", features = ["util"] }
