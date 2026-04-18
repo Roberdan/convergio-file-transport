@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.1.7](https://github.com/Roberdan/convergio-file-transport/compare/v0.1.6...v0.1.7) (2026-04-18)
+
+
+### Bug Fixes
+
+* security and quality audit pass 2 ([9adba7c](https://github.com/Roberdan/convergio-file-transport/commit/9adba7c8568157521521b3581008b0fbb01d0e43))
+* **security:** harden input validation against command injection ([c08236f](https://github.com/Roberdan/convergio-file-transport/commit/c08236f66374cbfb5de9f5f6ebad5a7eedfef83b))
+
 ## [0.1.6](https://github.com/Roberdan/convergio-file-transport/compare/v0.1.5...v0.1.6) (2026-04-13)
 
 
